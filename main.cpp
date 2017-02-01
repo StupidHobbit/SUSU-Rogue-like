@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     
     Location location(W, H);
     location.addUnit(getPattern("knight"), PLAYER1);
-    location.addUnit(getPattern("warrior"), PLAYER1);
+    //location.addUnit(getPattern("warrior"), PLAYER1);
     location.addUnit(getPattern("skeleton"), MONSTERS);
     location.addUnit(getPattern("skeleton"), MONSTERS);
     location.addUnit(getPattern("zombie"), MONSTERS);
@@ -43,7 +43,6 @@ int main(int argc, char* argv[])
     location.addUnit(getPattern("slime"), MONSTERS);
     //std::thread gameLoopThread(gameLoop, std::ref(location));
     
-    sf::Mutex mutex;
     sf::Thread gameLoopThread(&Location::gameLoop, &location);
     gameLoopThread.launch();
     
@@ -66,8 +65,8 @@ int main(int argc, char* argv[])
         	switch (eve.type)
         	{
 		        case sf::Event::Closed:
-		            app.close();
 		            gameLoopThread.terminate();
+		            app.close();
 		            break;
 		        case sf::Event::MouseWheelScrolled:
 		        	if (eve.mouseWheelScroll.delta > 0){
@@ -90,24 +89,42 @@ int main(int argc, char* argv[])
 		            prev = ms;
 					break;
 				case sf::Event::MouseButtonPressed:
-					if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl))
+					if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(GOTO, (int)worldPos.x / 32, (int)worldPos.y / 32));
+						location.mutex.unlock();
+					}
 						//std::cout << (int)worldPos.x / 32 << ' ' << (int)worldPos.y / 32 << std::endl;
 					break;
 				case sf::Event::Resized:
 					cam=app.getDefaultView();
 					break;
 				case sf::Event::KeyPressed:
-					if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+					if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(MOVE, -1, 0));
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+						location.mutex.unlock();
+					}
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(MOVE, 1, 0));
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+						location.mutex.unlock();
+					}
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(MOVE, 0, -1));
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+						location.mutex.unlock();
+					}
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(MOVE, 0, 1));
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+						location.mutex.unlock();
+					}
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)){
+						location.mutex.lock();
 						location.ordersQueue.push(Order(MOVE, 0, 0));
+						location.mutex.unlock();
+					}
 				
 				default:
 					break;
@@ -132,9 +149,12 @@ int main(int argc, char* argv[])
 
         app.setView(cam);
         app.clear();
+        
+        location.mutex.lock();
         app.draw(location.tileMap);
         app.draw(location.unitsSprites);
         app.draw(my_sprite);
+        location.mutex.unlock();
         app.display();
     }
 }
