@@ -13,6 +13,7 @@ class Unit;
 class Location
 {
 public:
+	sf::Mutex mutex;
 	std::vector< std::vector<char> > map;
     std::vector< std::vector<Unit*> > unitsMap;
 	std::queue<Order> ordersQueue;
