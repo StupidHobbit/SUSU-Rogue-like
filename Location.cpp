@@ -12,7 +12,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 {
 	map.assign(h, std::vector<char>(w, 0));
 	unitsMap.assign(h, std::vector<Unit*>(w, NULL));
-	visibilityMap.assign(h, std::vector<int>(w, 0));
+	visibilityMap.assign(h, std::vector<int>(w, 1));
 	unitsSprites.loadFrom(tileset, &visibilityMap);
 
 	int t_map[h * w];
@@ -90,8 +90,8 @@ void Location::updateVisibility(Unit *punit){
 	}
 	punit->visibleCells.clear();
 	if (isPlayer){
-				visibilityMap[cur_y][cur_x]++;
-				punit->visibleCells.push_back(sf::Vector2i(cur_x, cur_y));
+		visibilityMap[cur_y][cur_x]++;
+		punit->visibleCells.push_back(sf::Vector2i(cur_x, cur_y));
 	}
 	for(int angle = 0, R = punit->visRadius, x, y; angle < ANGLES_NUM; angle++){
 		for(int r = 1; r <= R; r++){
@@ -112,17 +112,29 @@ void Location::gameLoop(){
 	
 	while(true) for(auto punit:units){
 		sf::Vector2i pos, prevPos = punit->position;
-		
-		do{
-			std::this_thread::sleep_for(std::chrono::milliseconds(30));
-		}while(!(punit->makeTurn(*this)));
+		mutex.lock();
+		bool flag = punit->makeTurn(*this);
+		mutex.unlock();
+		if (punit->clan == PLAYER1)
+			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		while(!flag){
+			std::this_thread::sleep_for(std::chrono::milliseconds(15));
+			mutex.lock();
+			flag = punit->makeTurn(*this);
+			mutex.unlock();
+		}
 		pos = punit->position;
 		
+		mutex.lock();
 		updateVisibility(punit);
+		mutex.unlock();
 		
 		unitsMap[prevPos.y][prevPos.x] = NULL;
 		unitsMap[pos.y][pos.x] = punit;
+		
+		mutex.lock();
 		unitsSprites.setPos(punit->id, pos);
+		mutex.unlock();
 	}
 }
 
