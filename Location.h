@@ -1,6 +1,8 @@
 #include <vector>
 #include <queue>
 
+#include <SFML/System.hpp>
+
 #include "StaticTiledMap.h"
 #include "Tileset.h" 
 #include "Orders.h"
