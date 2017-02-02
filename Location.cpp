@@ -14,7 +14,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 {
 	map.assign(h, std::vector<char>(w, 1));
 	unitsMap.assign(h, std::vector<Unit*>(w, NULL));
-	visibilityMap.assign(h, std::vector<int>(w, 1));
+	visibilityMap.assign(h, std::vector<int>(w, 0));
 	unitsSprites.loadFrom(tileset, &visibilityMap);
 
 	int t_map[h * w];
