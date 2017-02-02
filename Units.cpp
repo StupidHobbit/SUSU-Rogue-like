@@ -8,7 +8,7 @@
 
 
 bool Unit::PlayersTurn(Location &location) {
-	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
+	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
 	int w = location.w, h = location.h;
 	sf::Vector2i pos;
 	if (!location.ordersQueue.empty()) {
@@ -62,7 +62,7 @@ bool Unit::PlayersTurn(Location &location) {
 
 bool Unit::MonstersTurn(Location &location) {
 	int w = location.w, h = location.h;
-	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
+	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
 	if (position == lastplace) {
 		lastplace.x = -1;
 		target = NULL;
@@ -131,11 +131,13 @@ bool Unit::makeTurn(Location &location) {
 	}
 }
 
-Unit::Unit(int hp, int clan): hp(hp), clan(clan), visRadius(10){}
-
+void Unit::kill(){
+	isAlive = false;
+}
 
 Unit::Unit(UnitPattern pattern, int clan):
-hp(pattern.hp), dmg(pattern.dmg),
-lvl(pattern.lvl), clan(clan), visRadius(10), target(NULL), lastplace(sf::Vector2i(-1, -1))
+hp(pattern.hp), dmg(pattern.dmg), isAlive(true),
+lvl(pattern.lvl), clan(clan), visRadius(10),
+target(NULL), lastplace(sf::Vector2i(-1, -1))
 {
 }

@@ -16,7 +16,7 @@
 #include "Units.h"
 
 
-const int W = 40, H = 40;
+const int W = 50, H = 40;
 
 
 void gameLoop(Location &location){
@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
     sf::RenderWindow app(sf::VideoMode(1280,720),"SUSU Rogue-like");
     app.setVerticalSyncEnabled(true);
     sf::View cam=app.getDefaultView();
-    int maxScale = 3, curScale = 0; 
+    int maxScale = 5, curScale = 0; 
     
     Location location(W, H);
     location.addUnit(getPattern("knight"), PLAYER1);

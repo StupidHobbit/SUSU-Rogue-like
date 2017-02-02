@@ -25,7 +25,9 @@ public:
 	Unit(int hp, int clan);
 	Unit(UnitPattern pattern, int clan);
 	virtual bool makeTurn(Location &location);
+	void kill();
 	
+	bool isAlive;
 	int hp; // hit points of unit
 	int clan;
 	int id;

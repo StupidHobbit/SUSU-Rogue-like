@@ -20,22 +20,41 @@ int SpriteVertex::append(int i, int j, int tileNumber){
 	// find its position in the tileset texture
     int tu = tileNumber % (m_tileset->getSize().x / tileSize);
     int tv = tileNumber / (m_tileset->getSize().x / tileSize);
+	if (heap.empty()){
+		sf::Vertex ver;
 
-    sf::Vertex ver;
+		ver.position = sf::Vector2f(i * tileSize, j * tileSize);
+		ver.texCoords = sf::Vector2f(tu * tileSize, tv * tileSize);
+		m_vertices.append(ver);
+		ver.position = sf::Vector2f((i + 1) * tileSize, j * tileSize);
+		ver.texCoords = sf::Vector2f((tu + 1) * tileSize, tv * tileSize);
+		m_vertices.append(ver);
+		ver.position = sf::Vector2f((i + 1) * tileSize, (j + 1) * tileSize);
+		ver.texCoords = sf::Vector2f((tu + 1) * tileSize, (tv + 1) * tileSize);
+		m_vertices.append(ver);
+		ver.position = sf::Vector2f(i * tileSize, (j + 1) * tileSize);
+		ver.texCoords = sf::Vector2f(tu * tileSize, (tv + 1) * tileSize);
+		m_vertices.append(ver);
+		return (m_vertices.getVertexCount() / 4) - 1;
+	}else{
+		int id = -heap.top() * 4;
+		heap.pop();
+		
+		m_vertices[id].position = sf::Vector2f(i * tileSize, j * tileSize);
+		m_vertices[id].texCoords = sf::Vector2f(tu * tileSize, tv * tileSize);
+		
+		m_vertices[id + 1].position = sf::Vector2f((i + 1) * tileSize, j * tileSize);
+		m_vertices[id + 1].texCoords = sf::Vector2f((tu + 1) * tileSize, tv * tileSize);
 
-    ver.position = sf::Vector2f(i * tileSize, j * tileSize);
-    ver.texCoords = sf::Vector2f(tu * tileSize, tv * tileSize);
-    m_vertices.append(ver);
-    ver.position = sf::Vector2f((i + 1) * tileSize, j * tileSize);
-    ver.texCoords = sf::Vector2f((tu + 1) * tileSize, tv * tileSize);
-    m_vertices.append(ver);
-    ver.position = sf::Vector2f((i + 1) * tileSize, (j + 1) * tileSize);
-    ver.texCoords = sf::Vector2f((tu + 1) * tileSize, (tv + 1) * tileSize);
-    m_vertices.append(ver);
-    ver.position = sf::Vector2f(i * tileSize, (j + 1) * tileSize);
-    ver.texCoords = sf::Vector2f(tu * tileSize, (tv + 1) * tileSize);
-	m_vertices.append(ver);
-	return (m_vertices.getVertexCount() / 4) - 1; 
+		m_vertices[id + 2].position = sf::Vector2f((i + 1) * tileSize, (j + 1) * tileSize);
+		m_vertices[id + 2].texCoords = sf::Vector2f((tu + 1) * tileSize, (tv + 1) * tileSize);
+
+		m_vertices[id + 3].position = sf::Vector2f(i * tileSize, (j + 1) * tileSize);
+		m_vertices[id + 3].texCoords = sf::Vector2f(tu * tileSize, (tv + 1) * tileSize);
+		
+		return id / 4;
+	}
+	
  }
  
 void SpriteVertex::setPos(int id, sf::Vector2i pos){
@@ -46,6 +65,11 @@ void SpriteVertex::setPos(int id, sf::Vector2i pos){
     m_vertices[id + 1].position = sf::Vector2f((i + 1) * tileSize, j * tileSize);
     m_vertices[id + 2].position = sf::Vector2f((i + 1) * tileSize, (j + 1) * tileSize);
     m_vertices[id + 3].position = sf::Vector2f(i * tileSize, (j + 1) * tileSize);
+}
+
+void SpriteVertex::erase(int id){
+	setPos(id, sf::Vector2i(0, 0));
+	heap.push(-id);
 }
 
 void SpriteVertex::draw(sf::RenderTarget& target, sf::RenderStates states) const
@@ -59,6 +83,10 @@ void SpriteVertex::draw(sf::RenderTarget& target, sf::RenderStates states) const
     sf::Vector2f pos;
     for(int i = 0; i < n; i+=4){
     	pos = m_vertices[i].position / (float)tileSize;
+    	//if (pos.x < 0) pos.x = 0;
+    	//if (pos.x >= (*visibilityMap)[0].size()) pos.x = (*visibilityMap)[0].size() - 1;
+    	//if (pos.y < 0) pos.y = 0;
+    	//if (pos.y >= (*visibilityMap).size()) pos.y = (*visibilityMap).size() - 1;
     	if ((*visibilityMap)[(int)pos.y][(int)pos.x]){
 			quad[0] = m_vertices[i];
 			quad[1] = m_vertices[i + 1];

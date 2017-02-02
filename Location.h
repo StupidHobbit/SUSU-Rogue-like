@@ -1,4 +1,5 @@
 #include <vector>
+#include <set>
 #include <queue>
 
 #include <SFML/System.hpp>
@@ -9,7 +10,9 @@
 #include "SpriteVertex.h"
 #include "UnitsPatterns.h"
 
+
 class Unit;
+struct Room;
 class Location
 {
 public:
@@ -17,7 +20,7 @@ public:
 	std::vector< std::vector<char> > map;
     std::vector< std::vector<Unit*> > unitsMap;
 	std::queue<Order> ordersQueue;
-	std::vector<Unit*> units;
+	std::set<Unit*> units;
 	SpriteVertex unitsSprites;
 	StaticTiledMap tileMap;
 	Tileset tileset;
@@ -27,6 +30,7 @@ public:
 	void addUnit(Unit *punit, int tileNum);
 	void addUnit(int tileNum, int hp, int clan);
 	void addUnit(UnitPattern pattern, int clan);
+	void removeUnit(Unit *punit);
 	void gameLoop();
 	std::vector<std::vector<int> > visibilityMap;
 	void updateVisibility(Unit *punit);
@@ -34,3 +38,13 @@ public:
 	int w, h;
 	bool mathInitialized;
 };
+
+
+struct Room{
+	sf::Vector2i pos, size;
+	 
+	Room(sf::Vector2i pos, sf::Vector2i size);	 
+	sf::Vector2i getRandWall(); 
+};
+
+int randint(int a, int b);
