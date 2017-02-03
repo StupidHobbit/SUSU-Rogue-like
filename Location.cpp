@@ -22,13 +22,13 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 	
 	const int roomsNum = 10,
 			  minSize = 5,
-			  maxSize = 11,
+			  maxSize = 12,
 			  gridSize = 12;
 	
 	std::vector< std::vector<char> > tempMap(h, std::vector<char>(w, 0));
 	std::vector<Room> rooms;
-	for (int ix = 0; ix + gridSize <= w; ix += gridSize)
-		for (int iy = 0; iy + gridSize <= h; iy += gridSize){
+	for (int ix = 2; ix + gridSize + 1 < w; ix += gridSize)
+		for (int iy = 2; iy + gridSize + 1 < h; iy += gridSize){
 			if (randint(0, 99) > 20){
 				int rw, rh, rx, ry;
 				rw = randint(minSize, maxSize);
@@ -60,11 +60,26 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 			std::stack <sf::Vector2i> path;
 			int temp = randint(0, rooms.size() - 1);
 			if (temp == i){
-				temp = (temp + randint(-1, 1) + rooms.size()) % rooms.size();
+				temp = (temp + 1 - 2 * (rand() % 2) + rooms.size()) % rooms.size();
 			}
 			Room room1 = rooms[i], room2 = rooms[temp];
 			sf::Vector2i door1 = room1.getRandWall(),
 						 door2 = room2.getRandWall();
+			{
+			bool f = true;
+			int dx[] = { 0, 1, 0, -1 };
+			int dy[] = { 1, 0, -1, 0 };
+			for (int i = 0; i < 4; i++){
+				if (t_map[(door1.y + dy[i]) * w + door1.x + dx[i]] >= DOOR2 &&
+				    t_map[(door1.y + dy[i]) * w + door1.x + dx[i]] <= DOOR4 ||
+					t_map[(door2.y + dy[i]) * w + door2.x + dx[i]] >= DOOR2 &&
+				    t_map[(door2.y + dy[i]) * w + door2.x + dx[i]] <= DOOR4){
+					f = false;
+					break;    
+				}
+			}
+			if (!f) continue;
+			}
 			tempMap[door1.y][door1.x] = tempMap[door2.y][door2.x] = 0;
 			find_path(tempMap, door1, door2, path);
 			if (!path.empty()){
@@ -140,7 +155,7 @@ void Location::removeUnit(Unit *punit){
 
 void Location::updateVisibility(Unit *punit){
 	static const float PI = 3.14159265359,
-					   RAD_DELTA = PI / 30;
+					   RAD_DELTA = PI / 40;
 	static const int   ANGLES_NUM = 2 * PI / RAD_DELTA;
 	static float m_sin[ANGLES_NUM], m_cos[ANGLES_NUM], angle = 0;
 	if (!mathInitialized){

@@ -16,7 +16,7 @@
 #include "Units.h"
 
 
-const int W = 50, H = 40;
+const int W = 63, H = 51;
 
 
 void gameLoop(Location &location){
