@@ -6,10 +6,11 @@
 #include "UnitSprites.h"
 
 struct UnitPattern{
- int hp,
+	int hp,
  	 dmg,
 	 lvl,
 	 spriteNum;
+	std::string name, description;
 };
 
 UnitPattern getPattern(std::string name);

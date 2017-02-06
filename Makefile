@@ -1,5 +1,5 @@
-SRCS = main.cpp StaticTiledMap.cpp Tileset.cpp SpriteVertex.cpp Location.cpp Units.cpp PathFinding.cpp UnitsPatterns.cpp
-OBJS = main.o StaticTiledMap.o  Tileset.o SpriteVertex.o Location.o Units.o PathFinding.o UnitsPatterns.o
+SRCS = main.cpp StaticTiledMap.cpp Tileset.cpp SpriteVertex.cpp Location.cpp Units.cpp PathFinding.cpp UnitsPatterns.cpp Interface.cpp
+OBJS = main.o StaticTiledMap.o  Tileset.o SpriteVertex.o Location.o Units.o PathFinding.o UnitsPatterns.o Interface.o
 CFLGS = -O2 -std=c++14
 
 

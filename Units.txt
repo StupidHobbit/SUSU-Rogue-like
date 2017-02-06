@@ -1,24 +1,26 @@
-knight:
+Knight:
+description = Brave warrior with a good armor
 hp = 11
 dmg = 3 
 lvl = 0
 spriteNum = 149
-warrior:
+Warrior:
+description = Elf soldier, agile and deadly
 hp = 10
 dmg = 5 
 lvl = 0
 spriteNum = 147
-skeleton:
+Skeleton:
 hp = 10
 dmg = 2
 lvl = 0
 spriteNum = 178
-slime:
+Slime:
 hp = 10
 dmg = 2
 lvl = 0
 spriteNum = 169
-zombie:
+Zombie:
 hp = 10
 dmg = 2
 lvl = 0

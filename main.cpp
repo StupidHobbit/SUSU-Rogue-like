@@ -13,6 +13,7 @@
 #include <SFML/Graphics/Sprite.hpp>
 
 #include "Location.h"
+#include "Interface.h"
 #include "Units.h"
 
 
@@ -30,18 +31,28 @@ int main(int argc, char* argv[])
     sf::RenderWindow app(sf::VideoMode(1280,720),"SUSU Rogue-like");
     app.setVerticalSyncEnabled(true);
     sf::View cam=app.getDefaultView();
+    //cam.setViewport(sf::FloatRect(0, 0, 0.75, 1));
     int maxScale = 5, curScale = 0; 
     
+    Tileset tileset("data/tileset.png", 16);
+    UnitInterface interface(sf::Vector2f(1024, 0), sf::Vector2i(560, 720), tileset);
+    //interface.loadFrom(tileset);
+    sf::View interfaceCam = app.getDefaultView();
+    //interfaceCam.setViewport(sf::FloatRect(0.75, 0, 0.25, 1));
+    
     Location location(W, H);
-    location.addUnit(getPattern("knight"), PLAYER1);
-    //location.addUnit(getPattern("warrior"), PLAYER1);
-    location.addUnit(getPattern("skeleton"), MONSTERS);
-    location.addUnit(getPattern("skeleton"), MONSTERS);
-    location.addUnit(getPattern("zombie"), MONSTERS);
-    location.addUnit(getPattern("zombie"), MONSTERS);
-    location.addUnit(getPattern("slime"), MONSTERS);
-    location.addUnit(getPattern("slime"), MONSTERS);
+    location.interface = &interface;
+    location.addUnit(getPattern("Knight"), PLAYER1);
+    location.addUnit(getPattern("Warrior"), PLAYER1);
+    location.addUnit(getPattern("Skeleton"), MONSTERS);
+    location.addUnit(getPattern("Skeleton"), MONSTERS);
+    location.addUnit(getPattern("Zombie"), MONSTERS);
+    location.addUnit(getPattern("Zombie"), MONSTERS);
+    location.addUnit(getPattern("Slime"), MONSTERS);
+    location.addUnit(getPattern("Slime"), MONSTERS);
     //std::thread gameLoopThread(gameLoop, std::ref(location));
+    
+    //interface.setUnit(location.units[0]);
     
     sf::Thread gameLoopThread(&Location::gameLoop, &location);
     gameLoopThread.launch();
@@ -53,12 +64,19 @@ int main(int argc, char* argv[])
     my_sprite.setTexture(my_tex);
     
     
+    
+    
     while(app.isOpen())
     {	
+    
+    	app.setView(cam);
     	sf::Vector2i pixelPos = sf::Mouse::getPosition(app);
         sf::Vector2f worldPos = app.mapPixelToCoords(pixelPos);
         sf::Vector2f tilePos = sf::Vector2f((int)(0.0001 + worldPos.x / 32.0) * 32,
         									(int)(0.0001 + worldPos.y / 32.0) * 32);
+        
+        interface.updateDescription((sf::Vector2f)pixelPos);
+        //std::cout << ((sf::Vector2f)pixelPos).x <<' '<< ((sf::Vector2f)pixelPos).y << std::endl;
     	
         sf::Event eve;
         while(app.pollEvent(eve))
@@ -97,7 +115,8 @@ int main(int argc, char* argv[])
 						//std::cout << (int)worldPos.x / 32 << ' ' << (int)worldPos.y / 32 << std::endl;
 					break;
 				case sf::Event::Resized:
-					cam=app.getDefaultView();
+					cam = app.getDefaultView();
+					curScale = 0;
 					break;
 				case sf::Event::KeyPressed:
 					if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
@@ -147,14 +166,19 @@ int main(int argc, char* argv[])
         my_sprite.setPosition(tilePos);     
         
 
-        app.setView(cam);
+        
         app.clear();
         
+        app.setView(cam);
         location.mutex.lock();
         app.draw(location.tileMap);
         app.draw(location.unitsSprites);
         app.draw(my_sprite);
         location.mutex.unlock();
+        
+        app.setView(interfaceCam);
+        app.draw(interface);
+        
         app.display();
     }
 }

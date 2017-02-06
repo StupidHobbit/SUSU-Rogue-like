@@ -1,3 +1,5 @@
+#ifndef LOCATION_INCLUDED
+#define LOCATION_INCLUDED
 #include <vector>
 #include <set>
 #include <queue>
@@ -7,10 +9,12 @@
 #include "StaticTiledMap.h"
 #include "Tileset.h" 
 #include "Orders.h"
+#include "Interface.h"
 #include "SpriteVertex.h"
 #include "UnitsPatterns.h"
+#include "Units.h"
 
-
+class UnitInterface;
 class Unit;
 struct Room;
 class Location
@@ -24,6 +28,7 @@ public:
 	SpriteVertex unitsSprites;
 	StaticTiledMap tileMap;
 	Tileset tileset;
+	UnitInterface *interface;
 	
 	Location(int w, int h);
 	sf::Vector2i findFreePos();
@@ -48,3 +53,5 @@ struct Room{
 };
 
 int randint(int a, int b);
+
+#endif //LOCATION_INCLUDED

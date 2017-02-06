@@ -1,13 +1,18 @@
 #ifndef UNITS_INCLUDED
 #define UNITS_INCLUDED
 #include <set>
+#include <string>
 #include <vector>
 #include <stack>
 #include <SFML/System/Vector2.hpp>
 
+#include "Location.h"
+#include "UnitsPatterns.h"
+
 const int PLAYER1 = 0,
 		  MONSTERS = 13;
 
+class Location;
 
 class Unit
 {
@@ -22,7 +27,7 @@ public:
 // when it's time of unit's turn, this function will be called
 // unit can move only in adjacent cell
 // must return position of unit after moving(even if he didn't moved)
-	Unit(int hp, int clan);
+	//Unit(int hp, int clan);
 	Unit(UnitPattern pattern, int clan);
 	virtual bool makeTurn(Location &location);
 	void kill();
@@ -34,6 +39,7 @@ public:
 	int lvl;
 	int dmg;
 	int visRadius;
+	std::string name, description;
 	sf::Vector2i position; // pair <x, y>
 	std::set<Unit*> visibleUnits;
 	std::vector<sf::Vector2i > visibleCells;

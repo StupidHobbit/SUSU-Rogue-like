@@ -5,7 +5,6 @@
 #include <iostream>
 
 #include "Location.h"
-#include "Units.h"
 #include "MapSprites.h"
 #include "PathFinding.h"
 
@@ -210,8 +209,10 @@ void Location::gameLoop(){
 		mutex.lock();
 		bool flag = punit->makeTurn(*this);
 		mutex.unlock();
-		if (punit->clan == PLAYER1)
+		if (punit->clan == PLAYER1){
+			interface->setUnit(punit);
 			std::this_thread::sleep_for(std::chrono::milliseconds(20));
+		}
 		while(!flag){
 			std::this_thread::sleep_for(std::chrono::milliseconds(15));
 			mutex.lock();

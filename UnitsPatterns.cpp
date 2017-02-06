@@ -14,6 +14,7 @@ UnitPattern getPattern(std::string name){
 			if (temp[temp.size() - 1] == ':'){
 				temp.pop_back();
 				curUnit = temp;
+				pattern.name = temp;
 				//std::cout << curUnit;
 				patterns[temp] = pattern;
 			}
@@ -28,6 +29,8 @@ UnitPattern getPattern(std::string name){
 					fin >> patterns[curUnit].dmg;
 				else if (temp == "spriteNum")
 					fin >> patterns[curUnit].spriteNum;
+				else if (temp == "description")
+					std::getline(fin, patterns[curUnit].description);
 			}
 		}
 		is_init = true;

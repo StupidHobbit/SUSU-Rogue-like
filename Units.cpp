@@ -2,7 +2,6 @@
 
 #include <SFML/System/Vector2.hpp>
 
-#include "Location.h"
 #include "Units.h"
 #include "PathFinding.h"
 
@@ -138,6 +137,7 @@ void Unit::kill(){
 Unit::Unit(UnitPattern pattern, int clan):
 hp(pattern.hp), dmg(pattern.dmg), isAlive(true),
 lvl(pattern.lvl), clan(clan), visRadius(10),
+name(pattern.name), description(pattern.description),
 target(NULL), lastplace(sf::Vector2i(-1, -1))
 {
 }
