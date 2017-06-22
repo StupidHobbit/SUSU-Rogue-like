@@ -11,6 +11,7 @@
 class Unit;
 class BaseInterface: public sf::Drawable
 {
+// class for user interface 
 public:
     BaseInterface(sf::Vector2f pos, sf::Vector2i size, Tileset& tileset);
     void loadFrom(Tileset& tileset);

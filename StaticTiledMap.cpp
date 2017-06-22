@@ -26,8 +26,8 @@ void StaticTiledMap::draw(sf::RenderTarget& target,sf::RenderStates states)const
     {
         for(int iy=top;iy<bottom;++iy)
         {	
-            if (ix >= 0 && iy >= 0 && ix < map_x && iy < map_y && (*visibilityMap)[iy][ix])
-            	target.draw(m_chunks[ix][iy],states);
+            if (ix >= 0 && iy >= 0 && ix < map_x && iy < map_y && (*visibilityMap)[iy][ix])	
+            	target.draw(m_chunks[ix][iy], states);
         }
     }
 }

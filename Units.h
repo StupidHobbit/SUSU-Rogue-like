@@ -26,14 +26,14 @@ private:
 public:
 // when it's time of unit's turn, this function will be called
 // unit can move only in adjacent cell
-// must return position of unit after moving(even if he didn't moved)
+// must return bool did unit moved or not
 	//Unit(int hp, int clan);
 	Unit(UnitPattern pattern, int clan);
 	virtual bool makeTurn(Location &location);
 	void kill();
 	
 	bool isAlive;
-	int hp; // hit points of unit
+	int hp, maxHp = 1; // hit points of unit
 	int clan;
 	int id;
 	int lvl;

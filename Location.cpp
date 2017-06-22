@@ -15,6 +15,9 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 	unitsMap.assign(h, std::vector<Unit*>(w, NULL));
 	visibilityMap.assign(h, std::vector<int>(w, 0));
 	unitsSprites.loadFrom(tileset, &visibilityMap);
+	hpBars.loadFrom(tileset, &visibilityMap);
+	hpBars.setMultiplicator(4.0);
+	hpBars.setTileSize(8);
 
 	int t_map[h * w];
 	for(int i = 0, n = w * h; i < n; i++) t_map[i] = WALL1;
@@ -22,13 +25,14 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 	const int roomsNum = 10,
 			  minSize = 5,
 			  maxSize = 12,
-			  gridSize = 12;
+			  gridSize = 12,
+			  room_rate = 80;
 	
 	std::vector< std::vector<char> > tempMap(h, std::vector<char>(w, 0));
 	std::vector<Room> rooms;
 	for (int ix = 2; ix + gridSize + 1 < w; ix += gridSize)
 		for (int iy = 2; iy + gridSize + 1 < h; iy += gridSize){
-			if (randint(0, 99) > 20){
+			if (randint(1, 100) < room_rate){
 				int rw, rh, rx, ry;
 				rw = randint(minSize, maxSize);
 				rh = randint(minSize, maxSize);
@@ -48,9 +52,24 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), m
 		}
 	
 	for(int i = 0, wall_num = w * h / 4, x, y; i < wall_num; i++){
-		x = rand() % w;
-		y = rand() % h;
+		x = randint(1, w - 1);
+		y = randint(1, h - 1);
 		tempMap[y][x] = 1;
+	}
+	for (int x = 0; x < w; x++){
+		tempMap[0][x] = 1;
+		tempMap[h-1][x] = 1;
+	}
+	for (int y = 0; y < h; y++){
+		tempMap[y][0] = 1;
+		tempMap[y][w-1] = 1;
+	}
+	
+	for(int i = 0, pillar_num = w * h / 25, x, y; i < pillar_num; i++){
+		x = randint(1, w - 1);
+		y = randint(1, h - 1);
+		map[y][x] = 1;
+		t_map[y * w + x] = PILLAR;			
 	}
 	
 	for (int i = 0; i < rooms.size(); i++){
@@ -136,8 +155,9 @@ void Location::addUnit(Unit *punit, int tileNum){
 	unitsMap[pos.y][pos.x] = punit;
 	units.insert(punit);
 	punit->id = unitsSprites.append(pos.x, pos.y, tileNum);
+	hpBars.append(pos.x, pos.y, HP0 - HP_NUM + 1);
 	//std::cout << tileNum << std::endl;
-	//updateVisibility(punit);
+	updateVisibility(punit);
 }
 
 void Location::addUnit(UnitPattern pattern, int clan){
@@ -147,6 +167,7 @@ void Location::addUnit(UnitPattern pattern, int clan){
 
 void Location::removeUnit(Unit *punit){
 	unitsSprites.erase(punit->id);
+	hpBars.erase(punit->id);
 	units.erase(punit);
 	unitsMap[punit->position.y][punit->position.x] = NULL;
 	delete punit;
@@ -154,7 +175,7 @@ void Location::removeUnit(Unit *punit){
 
 void Location::updateVisibility(Unit *punit){
 	static const float PI = 3.14159265359,
-					   RAD_DELTA = PI / 40;
+					   RAD_DELTA = PI / 100;
 	static const int   ANGLES_NUM = 2 * PI / RAD_DELTA;
 	static float m_sin[ANGLES_NUM], m_cos[ANGLES_NUM], angle = 0;
 	if (!mathInitialized){
@@ -166,7 +187,7 @@ void Location::updateVisibility(Unit *punit){
 	}
 	
 	sf::Vector2i pos = punit->position;
-	punit->visibleUnits.clear();
+	//punit->visibleUnits.clear();
 	bool isPlayer = punit->clan == PLAYER1;
 	int cur_x = pos.x, cur_y = pos.y;
 	
@@ -182,28 +203,27 @@ void Location::updateVisibility(Unit *punit){
 		for(int r = 1; r <= R; r++){
 			x = cur_x + (int)(r * m_cos[angle] + 0.5);
 			y = cur_y + (int)(r * m_sin[angle] + 0.5);
+			if (x == cur_x && y == cur_y) continue;
 			if (x < 0 || y < 0 || x >= w || y >= h) break;
 			if (isPlayer){
 				visibilityMap[y][x]++;
 				punit->visibleCells.push_back(sf::Vector2i(x, y));
 			}
-			if (unitsMap[y][x] != NULL) punit->visibleUnits.insert(unitsMap[y][x]); 
+			if (unitsMap[y][x] != NULL) {
+				punit->visibleUnits.insert(unitsMap[y][x]);
+				break;
+			} 
 			if (map[y][x]) break;
 		}
 	}
 }
 
 void Location::gameLoop(){
-	
 	while(true) for(auto punit:units){
 		if (!punit->isAlive){
 			removeUnit(punit);
 			continue;
 		}
-	 
-		mutex.lock();
-		updateVisibility(punit);
-		mutex.unlock();
 		
 		sf::Vector2i pos, prevPos = punit->position;
 		mutex.lock();
@@ -226,6 +246,12 @@ void Location::gameLoop(){
 		
 		mutex.lock();
 		unitsSprites.setPos(punit->id, pos);
+		hpBars.setPos(punit->id, pos);
+		hpBars.setTile(punit->id, HP0 - (int)(0.5 + HP_NUM * punit->hp / (float)(punit->maxHp)) + 1);
+		mutex.unlock();
+		
+		mutex.lock();
+		updateVisibility(punit);
 		mutex.unlock();
 	}
 }

@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdio.h>
+#include <exception>
 
 void BaseInterface::loadFrom(Tileset& tileset) 
 {
@@ -10,7 +11,7 @@ void BaseInterface::loadFrom(Tileset& tileset)
 }
 
 BaseInterface::BaseInterface(sf::Vector2f pos, sf::Vector2i size, Tileset& tileset):
-size(size), position(pos)
+size(size), position(pos), curDescription(nullptr)
 {
 	if (!font.loadFromFile("data/Font.ttf"))
 	{
@@ -39,7 +40,7 @@ int BaseInterface::append(sf::Vector2f pos, int tileNumber, std::string descript
 	sf::Text descrText;
 	descrText.setString(description); 
 	//descrText.setPosition(position + pos + sf::Vector2f(tileSize, tileSize));
-	descrText.setCharacterSize(tileSize * 2);
+	descrText.setCharacterSize(25);
 	descrText.setFont(font);
 	iconsDescriptions.push_back(descrText);
 	
@@ -62,7 +63,7 @@ int BaseInterface::append(int row, std::string text, std::string description){
 int BaseInterface::append(sf::Vector2f pos, std::string text, std::string description){
 	sf::Text descrText;
 	descrText.setString(description); 
-	descrText.setCharacterSize(tileSize * 2);
+	descrText.setCharacterSize(25);
 	//descrText.setPosition(position + pos + sf::Vector2f(tileSize, tileSize));
 	descrText.setFont(font);
 	labelsDescriptions.push_back(descrText);
@@ -109,12 +110,18 @@ int BaseInterface::setString(int id, int textNum){
 void BaseInterface::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(background, states);
+	//std::cout << "!" << std::endl;
 	for(auto label: labels)
     	target.draw(label, states);
     for(auto icon: icons)
     	target.draw(icon, states);
+    try{
     if (curDescription != nullptr){
     	target.draw(*curDescription, states);
+    }
+    }
+    catch (std::exception& e){
+    	std::cout << e.what() << '\n';
     }
 }
 

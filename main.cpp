@@ -27,7 +27,7 @@ void gameLoop(Location &location){
 int main(int argc, char* argv[])
 {   
 	srand(time(0));
-
+	
     sf::RenderWindow app(sf::VideoMode(1280,720),"SUSU Rogue-like");
     app.setVerticalSyncEnabled(true);
     sf::View cam=app.getDefaultView();
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     Location location(W, H);
     location.interface = &interface;
     location.addUnit(getPattern("Knight"), PLAYER1);
-    location.addUnit(getPattern("Warrior"), PLAYER1);
+    //location.addUnit(getPattern("Warrior"), PLAYER1);
     location.addUnit(getPattern("Skeleton"), MONSTERS);
     location.addUnit(getPattern("Skeleton"), MONSTERS);
     location.addUnit(getPattern("Zombie"), MONSTERS);
@@ -74,9 +74,8 @@ int main(int argc, char* argv[])
         sf::Vector2f worldPos = app.mapPixelToCoords(pixelPos);
         sf::Vector2f tilePos = sf::Vector2f((int)(0.0001 + worldPos.x / 32.0) * 32,
         									(int)(0.0001 + worldPos.y / 32.0) * 32);
-        
+
         interface.updateDescription((sf::Vector2f)pixelPos);
-        //std::cout << ((sf::Vector2f)pixelPos).x <<' '<< ((sf::Vector2f)pixelPos).y << std::endl;
     	
         sf::Event eve;
         while(app.pollEvent(eve))
@@ -162,23 +161,19 @@ int main(int argc, char* argv[])
             cam.move(10.f,0.f);
             
         
-        
-        my_sprite.setPosition(tilePos);     
-        
-
+        my_sprite.setPosition(tilePos);    
         
         app.clear();
-        
         app.setView(cam);
         location.mutex.lock();
         app.draw(location.tileMap);
         app.draw(location.unitsSprites);
+        app.draw(location.hpBars);
         app.draw(my_sprite);
         location.mutex.unlock();
-        
         app.setView(interfaceCam);
         app.draw(interface);
-        
+        //std::cout << "!" << std::endl;
         app.display();
     }
 }

@@ -16,9 +16,11 @@ private:
     sf::Texture *m_texture;
     int map_x,map_y,chunks_x,chunks_y;//map x and y - dimensions of map in tiles, chunks x and y - amount of chunks
     int tilesize;
-    std::vector<std::vector<sf::VertexArray> > m_chunks;
+    
     std::vector<std::vector<int> > *visibilityMap;
 public:
+	std::vector<std::vector<sf::VertexArray> > m_chunks;
+	
     StaticTiledMap(void);
     virtual ~StaticTiledMap(void){};
     void LoadFrom(Tileset& tileset, std::vector<std::vector<int> > *visMap, int tilemap[], int w, int h);
