@@ -167,9 +167,13 @@ void Location::addUnit(UnitPattern pattern, int clan){
 
 void Location::removeUnit(Unit *punit){
 	unitsSprites.erase(punit->id);
+	//std::cout << '!' << std::endl;
 	hpBars.erase(punit->id);
+	//std::cout << '!' << std::endl;
 	units.erase(punit);
+	//std::cout << '!' << std::endl;
 	unitsMap[punit->position.y][punit->position.x] = NULL;
+	//std::cout << '!' << std::endl;
 	delete punit;
 }
 
@@ -193,6 +197,7 @@ void Location::updateVisibility(Unit *punit){
 	
 	for(auto v:punit->visibleCells){
 		visibilityMap[v.y][v.x]--;
+		tileMap.setAlpha(v, 128);
 	}
 	punit->visibleCells.clear();
 	if (isPlayer){
@@ -207,6 +212,7 @@ void Location::updateVisibility(Unit *punit){
 			if (x < 0 || y < 0 || x >= w || y >= h) break;
 			if (isPlayer){
 				visibilityMap[y][x]++;
+				tileMap.setAlpha(sf::Vector2i(x, y), 255);
 				punit->visibleCells.push_back(sf::Vector2i(x, y));
 			}
 			if (unitsMap[y][x] != NULL) {
@@ -222,8 +228,13 @@ void Location::gameLoop(){
 	while(true) for(auto punit:units){
 		if (!punit->isAlive){
 			removeUnit(punit);
+			//std::cout << '!' << std::endl;
 			continue;
 		}
+		
+		mutex.lock();
+		updateVisibility(punit);
+		mutex.unlock();
 		
 		sf::Vector2i pos, prevPos = punit->position;
 		mutex.lock();
@@ -248,10 +259,6 @@ void Location::gameLoop(){
 		unitsSprites.setPos(punit->id, pos);
 		hpBars.setPos(punit->id, pos);
 		hpBars.setTile(punit->id, HP0 - (int)(0.5 + HP_NUM * punit->hp / (float)(punit->maxHp)) + 1);
-		mutex.unlock();
-		
-		mutex.lock();
-		updateVisibility(punit);
 		mutex.unlock();
 	}
 }
