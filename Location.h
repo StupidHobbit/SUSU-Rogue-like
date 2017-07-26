@@ -22,17 +22,14 @@ class Location
 // and visual information. Operates the proccess of making turns 
 {
 public:
-	sf::Mutex mutex; // mutex for blocking gameloop while drawing something
 	std::vector< std::vector<char> > map;	// location map, contains types of tiles
     std::vector< std::vector<Unit*> > unitsMap;	// contains pointers to units, standing in related tiles
-	std::queue<Order> ordersQueue;
 	std::set<Unit*> units;	// set of all units in location 
 	SpriteVertex unitsSprites; // visual information for units
-	SpriteVertex hpBars; // visual inforamtion for health bars
+	SpriteVertex hpBars; // visual information for health bars
 	SpriteVertex effects; 
 	StaticTiledMap tileMap; 	// visual inforamtion for map
 	Tileset tileset;	// information about tileset
-	UnitInterface *interface;	// pointer to user interfase object
 	
 	Location(int w, int h);
 	sf::Vector2i findFreePos();		// returns coords of any free from units tile
@@ -40,12 +37,9 @@ public:
 	void addUnit(int tileNum, int hp, int clan);
 	void addUnit(UnitPattern pattern, int clan);
 	void removeUnit(Unit *punit);				// remove unit
-	void gameLoop();	// forever loop, making units turns 
 	std::vector<std::vector<int> > visibilityMap;	// contains information about level of visibility(for player) of tiles
-	void updateVisibility(Unit *punit);	// update visibility with field of view of unit
 	
 	int w, h;	// width and height of unit
-	bool mathInitialized;
 };
 
 

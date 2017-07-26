@@ -20,8 +20,8 @@ private:
 	std::stack <sf::Vector2i> path;
 	Unit* target;
 	sf::Vector2i lastplace;
-	virtual bool MonstersTurn(Location &location);
-	virtual bool PlayersTurn(Location &location);
+	virtual bool MonstersTurn(std::queue<Order> &ordersQueue);
+	virtual bool PlayersTurn(std::queue<Order> &ordersQueue);
 		
 public:
 // when it's time of unit's turn, this function will be called
@@ -29,11 +29,12 @@ public:
 // must return bool did unit moved or not
 	//Unit(int hp, int clan);
 	Unit(UnitPattern pattern, int clan);
-	virtual bool makeTurn(Location &location);
+	virtual bool makeTurn(std::queue<Order> &ordersQueue);
 	void kill();
-	
+	Location *location;
+	int spriteNum;
 	bool isAlive;
-	int hp, maxHp = 1; // hit points of unit
+	int hp, maxHp; // hit points of unit
 	int clan;
 	int id;
 	int lvl;
@@ -47,4 +48,18 @@ public:
 	
 };
 
+
+struct hashUnit{
+   inline size_t operator() (const Unit &unit) const{
+      return unit.id;
+   }
+};
+
+// ñòðóêòóðà, ïðåäîñòàâëÿþùàÿ èíòåðôåéñ âûçîâà
+// ôóíêöèè ñðàâíåíèÿ äâóõ äåðåâüåâ
+struct equalAtUnit{
+   bool operator()(const Unit &unit1, const Unit &unit2) const{
+      return unit1.id == unit2.id;
+   }
+};
 #endif //UNITS_INCLUDED

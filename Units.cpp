@@ -6,13 +6,15 @@
 #include "PathFinding.h"
 
 
-bool Unit::PlayersTurn(Location &location) {
+bool Unit::PlayersTurn(std::queue<Order> &ordersQueue) {
 	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
-	int w = location.w, h = location.h;
+   if(hp<=0)
+         kill();
+	int w = location->w, h = location->h;
 	sf::Vector2i pos;
-	if (!location.ordersQueue.empty()) {
-		Order order = location.ordersQueue.front();
-		location.ordersQueue.pop();
+	if (!ordersQueue.empty()) {
+		Order order = ordersQueue.front();
+		ordersQueue.pop();
 		sf::Vector2i place;
 		if (order.type == MOVE) {
 			place = position + order.position;
@@ -23,7 +25,7 @@ bool Unit::PlayersTurn(Location &location) {
 		if (place == position) {
 			return true;
 		}
-		if (!check(place.x, place.y, w, h) || location.map[place.y][place.x] || !find_path(location.map, position, place, path)) {
+		if (!check(place.x, place.y, w, h) || location->map[place.y][place.x] || !find_path(location->map, position, place, path)) {
 			return false;
 		}
 	}
@@ -34,10 +36,11 @@ bool Unit::PlayersTurn(Location &location) {
 	}
 	pos = path.top();
 	path.pop();
-	if (location.unitsMap[pos.y][pos.x] != NULL) {
-		if (clan != location.unitsMap[pos.y][pos.x]->clan) {
+	if (location->unitsMap[pos.y][pos.x] != NULL) {
+		if (clan != location->unitsMap[pos.y][pos.x]->clan) {
 			if (!path.size()) {
 				//attack
+                           location->unitsMap[pos.y][pos.x]->hp-=dmg;
 				return true;
 			}
 			else {
@@ -59,8 +62,12 @@ bool Unit::PlayersTurn(Location &location) {
 }
 
 
-bool Unit::MonstersTurn(Location &location) {
-	int w = location.w, h = location.h;
+bool Unit::MonstersTurn(std::queue<Order> &ordersQueue) {
+    if(hp <= 0){
+        kill();
+    	return true;
+    }
+	int w = location->w, h = location->h;
 	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
 	if (position == lastplace) {
 		lastplace.x = -1;
@@ -68,17 +75,17 @@ bool Unit::MonstersTurn(Location &location) {
 	}
 	for (auto unit: visibleUnits) {
 		if (clan != unit->clan) {
-			if (find_path(location.map, position, unit->position, path) && (target == NULL || unit->dmg < target->dmg)) {
+			if (find_path(location->map, position, unit->position, path) && (target == NULL || unit->dmg < target->dmg)) {
 				target = unit;
 				lastplace = unit->position;
 			}
 			else {
-				if (find_path(location.map, position, unit->position, path) && unit->dmg == target->dmg && unit->hp < target->hp) {
+				if (find_path(location->map, position, unit->position, path) && unit->dmg == target->dmg && unit->hp < target->hp) {
 					target = unit;
 					lastplace = unit->position;
 				}
 				else {
-					if (find_path(location.map, position, unit->position, path) && target == unit) {
+					if (find_path(location->map, position, unit->position, path) && target == unit) {
 						lastplace = unit->position;
 					}
 				}
@@ -92,7 +99,7 @@ bool Unit::MonstersTurn(Location &location) {
 			count++;
 			place.x = rand() % w;
 			place.y = rand() % h;
-		} while ((place == position || !find_path(location.map, position, place, path)) && count != 100);
+		} while ((place == position || !find_path(location->map, position, place, path)) && count != 100);
 		if (count == 100) {
 			return true;
 		}
@@ -103,14 +110,15 @@ bool Unit::MonstersTurn(Location &location) {
 	sf::Vector2i pos;
 	pos = path.top();
 	path.pop();
-	if (location.unitsMap[pos.y][pos.x] != NULL) {
+	if (location->unitsMap[pos.y][pos.x] != NULL) {
                lastplace.x = -1;
                target = NULL;
                while (!path.empty()) {
                         path.pop();
                }
-		if (clan  != location.unitsMap[pos.y][pos.x]->clan) {
+		if (clan  != location->unitsMap[pos.y][pos.x]->clan) {
 			//attack
+                        location->unitsMap[pos.y][pos.x]->hp-=dmg;
 			return true;
 		}
 		else {
@@ -121,12 +129,12 @@ bool Unit::MonstersTurn(Location &location) {
 	return true;
 }
 
-bool Unit::makeTurn(Location &location) {
+bool Unit::makeTurn(std::queue<Order> &ordersQueue) {
 	if (clan == MONSTERS) {
-		return MonstersTurn(location);
+		return MonstersTurn(ordersQueue);
 	}
 	else {
-		return PlayersTurn(location);
+		return PlayersTurn(ordersQueue);
 	}
 }
 
@@ -135,7 +143,8 @@ void Unit::kill(){
 }
 
 Unit::Unit(UnitPattern pattern, int clan):
-hp(pattern.hp), maxHp(pattern.hp), dmg(pattern.dmg), isAlive(true),
+hp(pattern.hp), maxHp(pattern.hp), spriteNum(pattern.spriteNum),
+dmg(pattern.dmg), isAlive(true),
 lvl(pattern.lvl), clan(clan), visRadius(10),
 name(pattern.name), description(pattern.description),
 target(NULL), lastplace(sf::Vector2i(-1, -1))
