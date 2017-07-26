@@ -57,7 +57,7 @@ public:
             cam.move(VELOCITY * delta,0.f);
         if (preferableCenter.x != 0){
 			cam.move((preferableCenter - cam.getCenter()) * VELOCITY2 * delta);
-		    if (abs((preferableCenter - cam.getCenter()).x) < 0.5) preferableCenter.x = 0;
+		    if (abs((preferableCenter - cam.getCenter()).x) + abs((preferableCenter - cam.getCenter()).y) < 0.5) preferableCenter.x = 0;
         }
         app->setView(cam);
 	} 

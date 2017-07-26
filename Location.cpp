@@ -9,6 +9,12 @@
 #include "PathFinding.h"
 
 
+float SPIKE_CHANCE = 0.006, BROKEN_PLATE_CHANCE = 0.05;
+
+bool checkChance(float chance){
+	return rand() / (float)RAND_MAX <= chance;
+}
+
 Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 {
 	map.assign(h, std::vector<char>(w, 1));
@@ -20,13 +26,14 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 	hpBars.setTileSize(8);
 
 	int t_map[h * w];
-	for(int i = 0, n = w * h; i < n; i++) t_map[i] = WALL1;
+	for(int i = 0, n = w * h; i < n; i++) t_map[i] = WALL2;
 	
 	const int roomsNum = 10,
 			  minSize = 5,
 			  maxSize = 12,
 			  gridSize = 12,
-			  room_rate = 80;
+			  room_rate = 80; 
+	int illegal_door_num = w * h / gridSize / gridSize / 4;
 	
 	std::vector< std::vector<char> > tempMap(h, std::vector<char>(w, 0));
 	std::vector<Room> rooms;
@@ -34,6 +41,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 		for (int iy = 2; iy + gridSize + 1 < h; iy += gridSize){
 			if (randint(1, 100) < room_rate){
 				int rw, rh, rx, ry;
+				//int wall_type = rand() % 2;
 				rw = randint(minSize, maxSize);
 				rh = randint(minSize, maxSize);
 				rx = randint(ix, ix + gridSize - rw);
@@ -43,6 +51,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 					for (int iy = ry + 1, ny = ry + rh - 1; iy < ny; iy++){
 						map[iy][ix] = 0;
 						t_map[iy * w + ix] = PLATE2;
+						if (checkChance(BROKEN_PLATE_CHANCE)) t_map[iy * w + ix] = PLATE3;
 					}
 				for (int ix = rx, nx = rx + rw; ix < nx; ix++)
 					for (int iy = ry, ny = ry + rh; iy < ny; iy++){
@@ -108,7 +117,8 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 				path.pop();
 				while(!path.empty()){
 					t_map[iy * w + ix] = PLATE2;
-					if (randint(0, 199) == 1) t_map[iy * w + ix] = SPIKES;
+					if (checkChance(BROKEN_PLATE_CHANCE)) t_map[iy * w + ix] = PLATE3;
+					if (checkChance(SPIKE_CHANCE)) t_map[iy * w + ix] = SPIKES;
 					map[iy][ix] = 0;
 					ix = path.top().x, iy = path.top().y;
 					path.pop();
@@ -120,6 +130,19 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 			else{
 				tempMap[door1.y][door1.x] = tempMap[door2.y][door2.x] = 1;
 			}
+		}
+	}
+	for(int i = 0; i < illegal_door_num; i++){
+		while(true){
+			auto pos = rooms[rand() % rooms.size()].getRandWall();
+			if (t_map[pos.y * w + pos.x] == WALL2 && (t_map[pos.y * w + pos.x + 1] == WALL2 && t_map[pos.y * w + pos.x - 1] == WALL2 &&
+				t_map[pos.y * w + pos.x + w] != WALL2 && t_map[pos.y * w + pos.x - w] != WALL2 ||
+				t_map[pos.y * w + pos.x + 1] != WALL2 && t_map[pos.y * w + pos.x - 1] != WALL2 &&
+				t_map[pos.y * w + pos.x + w] == WALL2 && t_map[pos.y * w + pos.x - w] == WALL2)){
+					t_map[pos.y * w + pos.x] = ILLEGAL_DOOR;
+					map[pos.y][pos.x] = 0;
+					break;
+				}
 		}
 	}
 	
