@@ -1,5 +1,6 @@
 #include <SFML/Graphics.hpp>
 //#include <SFML/Time.hpp>
+#include <iostream>
 
 #include "Tileset.h"
 #include "SpriteVertex.h"
@@ -98,8 +99,10 @@ void SpriteVertex::setMultiplicator(double m){
 
 void SpriteVertex::erase(int id){
 	setPos(id, sf::Vector2i(0, 0));
-	velocity[id] = offset[id] = sf::Vector2f(0.0, 0.0);
+	velocity[id] = sf::Vector2f(0.0, 0.0);
+	std::cout << '!' << std::endl;
 	heap.push(-id);
+	std::cout << '!' << std::endl;
 }
 
 void SpriteVertex::draw(sf::RenderTarget& target, sf::RenderStates states) const
