@@ -15,6 +15,7 @@
 #include "Location.h"
 #include "Interface.h"
 #include "Units.h"
+#include "CameraManager.h"
 
 
 const int W = 63, H = 51;
@@ -30,9 +31,8 @@ int main(int argc, char* argv[])
 	
     sf::RenderWindow app(sf::VideoMode(1280,720),"SUSU Rogue-like");
     app.setVerticalSyncEnabled(true);
-    sf::View cam=app.getDefaultView();
+    CameraManager cam(app);
     //cam.setViewport(sf::FloatRect(0, 0, 0.75, 1));
-    int maxScale = 5, curScale = 0; 
     
     Tileset tileset("data/tileset.png", 16);
     UnitInterface interface(sf::Vector2f(1024, 0), sf::Vector2i(560, 720), tileset);
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     while(app.isOpen())
     {	
     
-    	app.setView(cam);
+    	cam.update();
     	sf::Vector2i pixelPos = sf::Mouse::getPosition(app);
         sf::Vector2f worldPos = app.mapPixelToCoords(pixelPos);
         sf::Vector2f tilePos = sf::Vector2f((int)(0.0001 + worldPos.x / 32.0) * 32,
@@ -78,93 +78,50 @@ int main(int argc, char* argv[])
         interface.updateDescription((sf::Vector2f)pixelPos);
     	
         sf::Event eve;
-        while(app.pollEvent(eve))
+        while(app.pollEvent(eve)){
         	switch (eve.type)
         	{
 		        case sf::Event::Closed:
 		            gameLoopThread.terminate();
 		            app.close();
 		            break;
-		        case sf::Event::MouseWheelScrolled:
-		        	if (eve.mouseWheelScroll.delta > 0){
-		        		if (curScale < maxScale){
-		        			curScale++;
-		        			cam.zoom(1.25);
-		        		}
-		        	}else{
-		        		if (curScale > -maxScale){
-		        			curScale--;
-		        			cam.zoom(0.80);
-		        		}
-		        	}
-		       		break;
-		       	case sf::Event::MouseMoved:
-					ms = sf::Vector2f(eve.mouseMove.x, eve.mouseMove.y);
-		            delta = ms - prev;
-		            if(sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		                cam.move(-delta);
-		            prev = ms;
-					break;
 				case sf::Event::MouseButtonPressed:
 					if(sf::Keyboard::isKeyPressed(sf::Keyboard::LControl)){
 						location.mutex.lock();
 						location.ordersQueue.push(Order(GOTO, (int)worldPos.x / 32, (int)worldPos.y / 32));
 						location.mutex.unlock();
 					}
-						//std::cout << (int)worldPos.x / 32 << ' ' << (int)worldPos.y / 32 << std::endl;
-					break;
-				case sf::Event::Resized:
-					cam = app.getDefaultView();
-					curScale = 0;
 					break;
 				case sf::Event::KeyPressed:
-					if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left)){
-						location.mutex.lock();
+					location.mutex.lock();
+					
+					if(sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
 						location.ordersQueue.push(Order(MOVE, -1, 0));
-						location.mutex.unlock();
-					}
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right)){
-						location.mutex.lock();
+						
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
 						location.ordersQueue.push(Order(MOVE, 1, 0));
-						location.mutex.unlock();
-					}
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up)){
-						location.mutex.lock();
+						
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
 						location.ordersQueue.push(Order(MOVE, 0, -1));
-						location.mutex.unlock();
-					}
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down)){
-						location.mutex.lock();
+						
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
 						location.ordersQueue.push(Order(MOVE, 0, 1));
-						location.mutex.unlock();
-					}
-					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space)){
-						location.mutex.lock();
+						
+					else if(sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 						location.ordersQueue.push(Order(MOVE, 0, 0));
-						location.mutex.unlock();
-					}
+						
+					location.mutex.unlock();
 				
 				default:
 					break;
 			}
-        
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
-            cam.move(0.f,-10.f);
-            
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
-            cam.move(-10.f,0.f);
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::S))
-            cam.move(0.f,10.f);
-
-        if(sf::Keyboard::isKeyPressed(sf::Keyboard::D))
-            cam.move(10.f,0.f);
+			cam.updateEvent(eve);
+		}
             
         
         my_sprite.setPosition(tilePos);    
         
         app.clear();
-        app.setView(cam);
         location.mutex.lock();
         app.draw(location.tileMap);
         app.draw(location.unitsSprites);
@@ -173,7 +130,6 @@ int main(int argc, char* argv[])
         location.mutex.unlock();
         app.setView(interfaceCam);
         app.draw(interface);
-        //std::cout << "!" << std::endl;
         app.display();
     }
 }
