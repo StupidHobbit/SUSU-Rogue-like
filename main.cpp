@@ -115,7 +115,7 @@ void gameLoop(){
 		cur_location->hpBars.setPos(punit->id, pos);
 		cur_location->hpBars.setTile(punit->id, HP0 - (int)(0.5 + HP_NUM * punit->hp / (float)(punit->maxHp)) + 1);
 		if (punit->clan == PLAYER1)
-			cam.setCenter(((sf::Vector2f)punit->position + sf::Vector2f(0.5, 0.5)) * 32.0f);
+			cam.setPreferableCenter(((sf::Vector2f)punit->position + sf::Vector2f(0.5, 0.5)) * 32.0f);
 		mutex.unlock();
 	}
 }
@@ -138,7 +138,10 @@ int main(int argc, char* argv[])
     units.insert(new Unit(getPattern("Slime"), MONSTERS));
     for(auto punit:units){
     	location.addUnit(punit, punit->spriteNum);
+    	if (punit->clan == PLAYER1)
+    		cam.setPreferableCenter(((sf::Vector2f)punit->position + sf::Vector2f(0.5, 0.5)) * 32.0f);
     }
+    
     //std::thread gameLoopThread(gameLoop, std::ref(location));
     
     cur_location = &location;
