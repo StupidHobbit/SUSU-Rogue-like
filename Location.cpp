@@ -9,7 +9,7 @@
 #include "PathFinding.h"
 
 
-Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h), mathInitialized(false)
+Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 {
 	map.assign(h, std::vector<char>(w, 1));
 	unitsMap.assign(h, std::vector<Unit*>(w, NULL));
@@ -156,8 +156,9 @@ void Location::addUnit(Unit *punit, int tileNum){
 	units.insert(punit);
 	punit->id = unitsSprites.append(pos.x, pos.y, tileNum);
 	hpBars.append(pos.x, pos.y, HP0 - HP_NUM + 1);
+	punit->location = this;
 	//std::cout << tileNum << std::endl;
-	updateVisibility(punit);
+	//updateVisibility(punit);
 }
 
 void Location::addUnit(UnitPattern pattern, int clan){
@@ -167,100 +168,10 @@ void Location::addUnit(UnitPattern pattern, int clan){
 
 void Location::removeUnit(Unit *punit){
 	unitsSprites.erase(punit->id);
-	//std::cout << '!' << std::endl;
+	std::cout << '!' << std::endl;
 	hpBars.erase(punit->id);
-	//std::cout << '!' << std::endl;
 	units.erase(punit);
-	//std::cout << '!' << std::endl;
 	unitsMap[punit->position.y][punit->position.x] = NULL;
-	//std::cout << '!' << std::endl;
-	delete punit;
-}
-
-void Location::updateVisibility(Unit *punit){
-	static const float PI = 3.14159265359,
-					   RAD_DELTA = PI / 100;
-	static const int   ANGLES_NUM = 2 * PI / RAD_DELTA;
-	static float m_sin[ANGLES_NUM], m_cos[ANGLES_NUM], angle = 0;
-	if (!mathInitialized){
-		for (int i = 0; i < ANGLES_NUM; i++, angle += RAD_DELTA){
-			m_sin[i] = sin(angle);
-			m_cos[i] = cos(angle);
-		}
-		mathInitialized = true;
-	}
-	
-	sf::Vector2i pos = punit->position;
-	//punit->visibleUnits.clear();
-	bool isPlayer = punit->clan == PLAYER1;
-	int cur_x = pos.x, cur_y = pos.y;
-	
-	for(auto v:punit->visibleCells){
-		visibilityMap[v.y][v.x]--;
-		tileMap.setAlpha(v, 128);
-	}
-	punit->visibleCells.clear();
-	if (isPlayer){
-		visibilityMap[cur_y][cur_x]++;
-		punit->visibleCells.push_back(sf::Vector2i(cur_x, cur_y));
-	}
-	for(int angle = 0, R = punit->visRadius, x, y; angle < ANGLES_NUM; angle++){
-		for(int r = 1; r <= R; r++){
-			x = cur_x + (int)(r * m_cos[angle] + 0.5);
-			y = cur_y + (int)(r * m_sin[angle] + 0.5);
-			if (x == cur_x && y == cur_y) continue;
-			if (x < 0 || y < 0 || x >= w || y >= h) break;
-			if (isPlayer){
-				visibilityMap[y][x]++;
-				tileMap.setAlpha(sf::Vector2i(x, y), 255);
-				punit->visibleCells.push_back(sf::Vector2i(x, y));
-			}
-			if (unitsMap[y][x] != NULL) {
-				punit->visibleUnits.insert(unitsMap[y][x]);
-				break;
-			} 
-			if (map[y][x]) break;
-		}
-	}
-}
-
-void Location::gameLoop(){
-	while(true) for(auto punit:units){
-		if (!punit->isAlive){
-			removeUnit(punit);
-			//std::cout << '!' << std::endl;
-			continue;
-		}
-		
-		mutex.lock();
-		updateVisibility(punit);
-		mutex.unlock();
-		
-		sf::Vector2i pos, prevPos = punit->position;
-		mutex.lock();
-		bool flag = punit->makeTurn(*this);
-		mutex.unlock();
-		if (punit->clan == PLAYER1){
-			interface->setUnit(punit);
-			std::this_thread::sleep_for(std::chrono::milliseconds(20));
-		}
-		while(!flag){
-			std::this_thread::sleep_for(std::chrono::milliseconds(15));
-			mutex.lock();
-			flag = punit->makeTurn(*this);
-			mutex.unlock();
-		}
-		pos = punit->position;
-		
-		unitsMap[prevPos.y][prevPos.x] = NULL;
-		unitsMap[pos.y][pos.x] = punit;
-		
-		mutex.lock();
-		unitsSprites.setPos(punit->id, pos);
-		hpBars.setPos(punit->id, pos);
-		hpBars.setTile(punit->id, HP0 - (int)(0.5 + HP_NUM * punit->hp / (float)(punit->maxHp)) + 1);
-		mutex.unlock();
-	}
 }
 
 
