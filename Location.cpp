@@ -27,14 +27,14 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 
 	int t_map[h * w];
 	for(int i = 0, n = w * h; i < n; i++) t_map[i] = WALL2;
-	
+
 	const int roomsNum = 10,
 			  minSize = 5,
 			  maxSize = 12,
 			  gridSize = 12,
-			  room_rate = 80; 
+			  room_rate = 80;
 	int illegal_door_num = w * h / gridSize / gridSize / 4;
-	
+
 	std::vector< std::vector<char> > tempMap(h, std::vector<char>(w, 0));
 	std::vector<Room> rooms;
 	for (int ix = 2; ix + gridSize + 1 < w; ix += gridSize)
@@ -59,7 +59,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 					}
 			}
 		}
-	
+
 	for(int i = 0, wall_num = w * h / 4, x, y; i < wall_num; i++){
 		x = randint(1, w - 1);
 		y = randint(1, h - 1);
@@ -73,14 +73,18 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 		tempMap[y][0] = 1;
 		tempMap[y][w-1] = 1;
 	}
-	
-	for(int i = 0, pillar_num = w * h / 25, x, y; i < pillar_num; i++){
+    //std::cout << '!' << std::endl;
+	for(int i = 0, pillar_num = w * h / 125, x, y, l, flag; i < pillar_num; i++){
 		x = randint(1, w - 1);
 		y = randint(1, h - 1);
-		map[y][x] = 1;
-		t_map[y * w + x] = PILLAR;			
+		l = randint(3, maxSize);
+		flag = rand()%2;
+        for (int j = 0; j < l && x && w && y < h; j++, x += flag, y += !flag){
+            map[y][x] = 1;
+            t_map[y * w + x] = PILLAR;
+        }
 	}
-	
+    ///std::cout << '!' << std::endl;
 	for (int i = 0; i < rooms.size(); i++){
 		bool f = false;
 		while(!f){
@@ -102,7 +106,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 					t_map[(door2.y + dy[i]) * w + door2.x + dx[i]] >= DOOR2 &&
 				    t_map[(door2.y + dy[i]) * w + door2.x + dx[i]] <= DOOR4){
 					f = false;
-					break;    
+					break;
 				}
 			}
 			if (!f) continue;
@@ -113,17 +117,31 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 				int ix = door1.x, iy = door1.y;
 				t_map[iy * w + ix] = randint(DOOR2, DOOR4);
 				map[iy][ix] = 0;
+				int tx = (path.top() + (path.top() - door1)).x,
+                    ty = (path.top() + (path.top() - door1)).y;
+				if (t_map[ty*w + tx] == PILLAR){
+                    t_map[ty*w + tx] = PILLAR;
+                    map[ty][tx] = 0;
+                }
 				ix = path.top().x, iy = path.top().y;
 				path.pop();
+				sf::Vector2i prev_i;
 				while(!path.empty()){
 					t_map[iy * w + ix] = PLATE2;
 					if (checkChance(BROKEN_PLATE_CHANCE)) t_map[iy * w + ix] = PLATE3;
 					if (checkChance(SPIKE_CHANCE)) t_map[iy * w + ix] = SPIKES;
 					map[iy][ix] = 0;
+					prev_i = {ix, iy};
 					ix = path.top().x, iy = path.top().y;
 					path.pop();
 				}
 				t_map[iy * w + ix] = randint(DOOR2, DOOR4);
+				tx = (prev_i + (prev_i - door2)).x,
+				ty = (prev_i + (prev_i - door2)).y;
+				if (t_map[ty*w + tx] == PILLAR){
+                    t_map[ty*w + tx] = PILLAR;
+                    map[ty][tx] = 0;
+                }
 				map[iy][ix] = 0;
 				f = true;
 			}
@@ -145,22 +163,22 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 				}
 		}
 	}
-	
+
 	/*for (int x = 0; x < w; x++){
 		map[0][x] = 1;
 		map[h-1][x] = 1;
-		//t_map[x] = t_map[w * (h - 1) + x] = 18; 
+		//t_map[x] = t_map[w * (h - 1) + x] = 18;
 	}
 	for (int y = 0; y < w; y++){
 		map[y][0] = 1;
 		map[y][w-1] = 1;
-		//t_map[y * w] = t_map[y * w + w - 1] = 18; 
+		//t_map[y * w] = t_map[y * w + w - 1] = 18;
 	}
 	map[0][0] = 1;
-	t_map[w + 1] = 18; 
-	*/	
+	t_map[w + 1] = 18;
+	*/
     StaticTiledMap TileMap;
-    tileMap.LoadFrom(tileset, &visibilityMap, t_map, w, h); 
+    tileMap.LoadFrom(tileset, &visibilityMap, t_map, w, h);
 }
 
 sf::Vector2i Location::findFreePos(){
@@ -201,15 +219,15 @@ void Location::removeUnit(Unit *punit){
 sf::Vector2i Room::getRandWall(){
 	if (rand() % 2){
 		int temp = randint(1, size.x - 2);
-		return pos + sf::Vector2i(temp, (rand() % 2) * (size.y - 1)); 
+		return pos + sf::Vector2i(temp, (rand() % 2) * (size.y - 1));
 	}else{
 		int temp = randint(1, size.y - 2);
-		return pos + sf::Vector2i((rand() % 2) * (size.x - 1), temp); 
+		return pos + sf::Vector2i((rand() % 2) * (size.x - 1), temp);
 	}
-} 
+}
 
 
-Room::Room(sf::Vector2i pos, sf::Vector2i size): 
+Room::Room(sf::Vector2i pos, sf::Vector2i size):
 pos(pos), size(size)
 {}
 
