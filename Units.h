@@ -12,6 +12,9 @@
 const int PLAYER1 = 0,
 		  MONSTERS = 13;
 
+enum{
+    ATTACK
+};
 class Location;
 
 class Unit
@@ -19,10 +22,12 @@ class Unit
 private:
 	std::stack <sf::Vector2i> path;
 	Unit* target;
+	int actiontype;
 	sf::Vector2i lastplace;
-	virtual bool MonstersTurn(std::queue<Order> &ordersQueue);
-	virtual bool PlayersTurn(std::queue<Order> &ordersQueue);
-		
+	void attack(Unit *unit);
+	virtual bool monstersTurn();
+	virtual bool playersTurn(std::queue<Order> &ordersQueue);
+
 public:
 // when it's time of unit's turn, this function will be called
 // unit can move only in adjacent cell
@@ -45,7 +50,7 @@ public:
 	std::set<Unit*> visibleUnits;
 	std::vector<sf::Vector2i > visibleCells;
 
-	
+
 };
 
 
@@ -55,8 +60,6 @@ struct hashUnit{
    }
 };
 
-// ñòðóêòóðà, ïðåäîñòàâëÿþùàÿ èíòåðôåéñ âûçîâà
-// ôóíêöèè ñðàâíåíèÿ äâóõ äåðåâüåâ
 struct equalAtUnit{
    bool operator()(const Unit &unit1, const Unit &unit2) const{
       return unit1.id == unit2.id;

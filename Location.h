@@ -2,13 +2,12 @@
 #define LOCATION_INCLUDED
 #include <vector>
 #include <set>
-#include <map>
 #include <queue>
 
 #include <SFML/System.hpp>
 
 #include "StaticTiledMap.h"
-#include "Tileset.h"
+#include "Tileset.h" 
 #include "Orders.h"
 #include "Interface.h"
 #include "SpriteVertex.h"
@@ -20,18 +19,18 @@ class Unit;
 struct Room;
 class Location
 // main class. Contains information about location map and units,
-// and visual information. Operates the proccess of making turns
+// and visual information. Operates the proccess of making turns 
 {
+public:
+	std::vector< std::vector<char> > map;	// location map, contains types of tiles
+    std::vector< std::vector<Unit*> > unitsMap;	// contains pointers to units, standing in related tiles
+	std::set<Unit*> units;	// set of all units in location 
 	SpriteVertex unitsSprites; // visual information for units
 	SpriteVertex hpBars; // visual information for health bars
-	SpriteVertex effects;
-	StaticTiledMap tileMap; 	// visual information for map
+	SpriteVertex effects; 
+	StaticTiledMap tileMap; 	// visual inforamtion for map
 	Tileset tileset;	// information about tileset
-public:
-    map<Vector2i, pair<Location*, sf::Vector2i>> exits;
-    std::vector< std::vector<char> > map;	// location map, contains types of tiles
-	std::set<Unit*> units;	// set of all units in location
-    std::vector< std::vector<Unit*> > unitsMap;	// contains pointers to units, standing in related tiles
+	
 	Location(int w, int h);
 	sf::Vector2i findFreePos();		// returns coords of any free from units tile
 	void addUnit(Unit *punit, int tileNum);		// add unit in location
@@ -39,7 +38,7 @@ public:
 	void addUnit(UnitPattern pattern, int clan);
 	void removeUnit(Unit *punit);				// remove unit
 	std::vector<std::vector<int> > visibilityMap;	// contains information about level of visibility(for player) of tiles
-
+	
 	int w, h;	// width and height of unit
 };
 
@@ -47,9 +46,9 @@ public:
 struct Room{
 // utility class for rooms in dung
 	sf::Vector2i pos, size;
-
-	Room(sf::Vector2i pos, sf::Vector2i size);
-	sf::Vector2i getRandWall();		// return random wall of room
+	 
+	Room(sf::Vector2i pos, sf::Vector2i size);	 
+	sf::Vector2i getRandWall();		// return random wall of room 
 };
 
 int randint(int a, int b);

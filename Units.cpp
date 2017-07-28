@@ -1,74 +1,66 @@
 #include <queue>
 
 #include <SFML/System/Vector2.hpp>
-
+#include<iostream>
 #include "Units.h"
 #include "PathFinding.h"
 
+void Unit::attack(Unit *unit){
+    unit->hp-=dmg;
+}
 
-bool Unit::PlayersTurn(std::queue<Order> &ordersQueue) {
-	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
-   if(hp<=0)
-         kill();
+bool Unit::playersTurn(std::queue<Order> &ordersQueue) {
 	int w = location->w, h = location->h;
 	sf::Vector2i pos;
 	if (!ordersQueue.empty()) {
 		Order order = ordersQueue.front();
 		ordersQueue.pop();
-		sf::Vector2i place;
-		if (order.type == MOVE) {
-			place = position + order.position;
-		}
-		else {
-			place = order.position;
-		}
-		if (place == position) {
-			return true;
-		}
-		if (!check(place.x, place.y, w, h) || location->map[place.y][place.x] || !find_path(location->map, position, place, path)) {
-			return false;
+		switch(order.type){
+        case MOVE:{
+            sf::Vector2i place = position + order.position;
+            if (place == position)
+                return true;
+            if (!check(place, w, h) || location->map[place.y][place.x] || !astar_find_path(location, position, place, path))
+                return false;
+            actiontype = ATTACK;
+            break;
+        }
+        case GOTO:{
+            sf::Vector2i place = order.position;
+            if (place == position)
+                return true;
+            if (!check(place, w, h) || location->map[place.y][place.x] || !astar_find_path(location, position, place, path))
+                return false;
+            actiontype = ATTACK;
+            break;
+        }
 		}
 	}
-	else {
-		if (!path.size()) {
-			return false;
-		}
-	}
+	else
+        if (!path.size())
+            return false;
 	pos = path.top();
 	path.pop();
-	if (location->unitsMap[pos.y][pos.x] != NULL) {
-		if (clan != location->unitsMap[pos.y][pos.x]->clan) {
-			if (!path.size()) {
-				//attack
-                           location->unitsMap[pos.y][pos.x]->hp-=dmg;
-				return true;
-			}
-			else {
-				while (!path.empty()) {
-					path.pop();
-				}
-				return false;
-			}
-		}
-		else {
-			while (!path.empty()) {
-				path.pop();
-			}
-			return false;
-		}
+	switch(actiontype){
+    case ATTACK:
+        if(location->unitsMap[pos.y][pos.x] == NULL)
+            position = pos;
+        else
+            if (location->unitsMap[pos.y][pos.x]->clan == MONSTERS && !path.size())
+                attack(location->unitsMap[pos.y][pos.x]);
+            else{
+                while (!path.empty())
+                    path.pop();
+                return false;
+            }
+        break;
 	}
-	position = pos;
 	return true;
 }
 
 
-bool Unit::MonstersTurn(std::queue<Order> &ordersQueue) {
-    if(hp <= 0){
-        kill();
-    	return true;
-    }
+bool Unit::monstersTurn() {
 	int w = location->w, h = location->h;
-	//ГЇГ°Г®ГўГҐГ°ГЄГ  Г§Г¤Г®Г°Г®ГўГјГї
 	if (position == lastplace) {
 		lastplace.x = -1;
 		target = NULL;
@@ -118,7 +110,7 @@ bool Unit::MonstersTurn(std::queue<Order> &ordersQueue) {
                }
 		if (clan  != location->unitsMap[pos.y][pos.x]->clan) {
 			//attack
-                        location->unitsMap[pos.y][pos.x]->hp-=dmg;
+            attack(location->unitsMap[pos.y][pos.x]);
 			return true;
 		}
 		else {
@@ -130,12 +122,18 @@ bool Unit::MonstersTurn(std::queue<Order> &ordersQueue) {
 }
 
 bool Unit::makeTurn(std::queue<Order> &ordersQueue) {
-	if (clan == MONSTERS) {
-		return MonstersTurn(ordersQueue);
-	}
-	else {
-		return PlayersTurn(ordersQueue);
-	}
+    if(hp <= 0){
+        kill();
+    	return true;
+    }
+    switch(clan){
+    case MONSTERS:
+        return monstersTurn();
+        break;
+    case PLAYER1:
+        return playersTurn(ordersQueue);
+        break;
+    }
 }
 
 void Unit::kill(){
@@ -147,6 +145,6 @@ hp(pattern.hp), maxHp(pattern.hp), spriteNum(pattern.spriteNum),
 dmg(pattern.dmg), isAlive(true),
 lvl(pattern.lvl), clan(clan), visRadius(10),
 name(pattern.name), description(pattern.description),
-target(NULL), lastplace(sf::Vector2i(-1, -1))
+target(NULL), lastplace(sf::Vector2i(-1, -1)), actiontype(0)
 {
 }
