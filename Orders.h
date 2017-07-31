@@ -1,5 +1,8 @@
-const int GOTO = 0,  // absolute displacement
-		  MOVE = 1;	 // relative displacement
+enum {
+    GOTO,    // absolute displacement
+    MOVE,	 // relative displacement
+    ENTER    // order to enter the dung
+};
 
 
 

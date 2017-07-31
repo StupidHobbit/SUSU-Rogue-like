@@ -5,7 +5,7 @@
 
 #include "StaticTiledMap.h"
 
-		
+
 void StaticTiledMap::draw(sf::RenderTarget& target,sf::RenderStates states)const
 {
 
@@ -27,8 +27,8 @@ void StaticTiledMap::draw(sf::RenderTarget& target,sf::RenderStates states)const
     for(int ix=left;ix<right;++ix)
     {
         for(int iy=top;iy<bottom;++iy)
-        {	
-            //if (ix >= 0 && iy >= 0 && ix < map_x && iy < map_y && (*visibilityMap)[iy][ix])	
+        {
+            //if (ix >= 0 && iy >= 0 && ix < map_x && iy < map_y && (*visibilityMap)[iy][ix])
             	target.draw(m_chunks[iy][ix], states);
         }
     }
@@ -64,10 +64,10 @@ void StaticTiledMap::LoadFrom(Tileset& tileset, std::vector<std::vector<int> > *
         for(int gx=0;gx<map_x;++gx)
         {
             sf::VertexArray *garr = &(m_chunks[gy/chunksize][gx/chunksize]);
-             
+
             int tex_x = tilemap[gy * w + gx] % tiles_per_string,
     		tex_y = tilemap[gy * w + gx] / tiles_per_string;
-    	
+
 		    sf::Vertex ver;
 		    ver.position=sf::Vector2f(gx*tilesize,gy*tilesize);
 		    ver.texCoords=sf::Vector2f(tex_x*tilesize,tex_y*tilesize);
@@ -78,15 +78,15 @@ void StaticTiledMap::LoadFrom(Tileset& tileset, std::vector<std::vector<int> > *
 		    garr->append(ver);
 
 		    ver.position=sf::Vector2f(gx*tilesize+tilesize,gy*tilesize+tilesize);
-		    ver.texCoords=sf::Vector2f(tex_x*tilesize+tilesize,tex_y*tilesize+tilesize);	
+		    ver.texCoords=sf::Vector2f(tex_x*tilesize+tilesize,tex_y*tilesize+tilesize);
 		    garr->append(ver);
 
 		    ver.position=sf::Vector2f(gx*tilesize,gy*tilesize+tilesize);
 		    ver.texCoords=sf::Vector2f(tex_x*tilesize,tex_y*tilesize+tilesize);
 		    garr->append(ver);
-        }	
+        }
     }
-    
+
     for(int gy=0;gy<map_y;++gy)
     {
         for(int gx=0;gx<map_x;++gx)
@@ -105,4 +105,18 @@ void StaticTiledMap::setAlpha(sf::Vector2i pos, int val){
 	m_chunks[chunk_y][chunk_x][i+1].color.a = val;
 	m_chunks[chunk_y][chunk_x][i+2].color.a = val;
 	m_chunks[chunk_y][chunk_x][i+3].color.a = val;
+}
+
+void StaticTiledMap::setTile(sf::Vector2i pos, char tileNum){
+	static int chunk_x, chunk_y, i;
+	chunk_x = pos.x/chunksize;
+	chunk_y = pos.y/chunksize;
+	i = ((pos.y - chunk_y * chunksize) * std::min(chunksize, map_x - chunk_x * chunksize) + pos.x - chunk_x * chunksize) * 4;
+	int tiles_per_string = (m_texture->getSize().x / tilesize);
+	int tex_x = tileNum % tiles_per_string,
+        tex_y = tileNum / tiles_per_string;
+	m_chunks[chunk_y][chunk_x][i].texCoords=sf::Vector2f(tex_x*tilesize,tex_y*tilesize);
+	m_chunks[chunk_y][chunk_x][i+1].texCoords=sf::Vector2f(tex_x*tilesize+tilesize,tex_y*tilesize);
+	m_chunks[chunk_y][chunk_x][i+2].texCoords=sf::Vector2f(tex_x*tilesize+tilesize,tex_y*tilesize+tilesize);
+	m_chunks[chunk_y][chunk_x][i+3].texCoords=sf::Vector2f(tex_x*tilesize,tex_y*tilesize+tilesize);
 }

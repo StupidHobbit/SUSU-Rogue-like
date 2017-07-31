@@ -20,6 +20,7 @@ private:
     std::vector<std::vector<int> > *visibilityMap;
 public:
 	void setAlpha(sf::Vector2i, int);
+	void setTile(sf::Vector2i, char);
     StaticTiledMap(void);
     virtual ~StaticTiledMap(void){};
     void LoadFrom(Tileset& tileset, std::vector<std::vector<int> > *visMap, int tilemap[], int w, int h);

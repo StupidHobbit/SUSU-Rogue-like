@@ -13,6 +13,6 @@ struct UnitPattern{
 	std::string name, description;
 };
 
-UnitPattern getPattern(std::string name);
+UnitPattern getPattern(std::string name = "");
 
 #endif //UNITS_PATTERNS_INCLUDED

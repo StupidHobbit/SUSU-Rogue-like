@@ -1,0 +1,131 @@
+# depslib dependency file v1.0
+1500914036 source:/home/artes/Документы/C++ SFML Game (копия)/Interface.cpp
+	"Interface.h"
+	<iostream>
+	<sstream>
+	<stdio.h>
+	<exception>
+
+1500913933 /home/artes/Документы/C++ SFML Game (копия)/Interface.h
+	<string>
+	<SFML/Graphics.hpp>
+	<SFML/System.hpp>
+	"Tileset.h"
+	"Units.h"
+
+1486152262 /home/artes/Документы/C++ SFML Game (копия)/Tileset.h
+
+1501077870 /home/artes/Документы/C++ SFML Game (копия)/Units.h
+	<set>
+	<string>
+	<vector>
+	<stack>
+	<SFML/System/Vector2.hpp>
+	"Location.h"
+	"UnitsPatterns.h"
+
+1501443152 /home/artes/Документы/C++ SFML Game (копия)/Location.h
+	<vector>
+	<set>
+	<map>
+	<queue>
+	<utility>
+	<SFML/System.hpp>
+	"StaticTiledMap.h"
+	"Tileset.h"
+	"Orders.h"
+	"Interface.h"
+	"SpriteVertex.h"
+	"UnitsPatterns.h"
+	"Units.h"
+
+1501260480 /home/artes/Документы/C++ SFML Game (копия)/StaticTiledMap.h
+	<SFML/Graphics/Drawable.hpp>
+	<SFML/Graphics/Texture.hpp>
+	<SFML/Graphics/VertexArray.hpp>
+	<vector>
+	"Tileset.h"
+
+1501308949 /home/artes/Документы/C++ SFML Game (копия)/Orders.h
+
+1494613910 /home/artes/Документы/C++ SFML Game (копия)/SpriteVertex.h
+	<queue>
+
+1501508302 /home/artes/Документы/C++ SFML Game (копия)/UnitsPatterns.h
+	<string>
+	<unordered_map>
+	<fstream>
+	"UnitSprites.h"
+
+1485629870 /home/artes/Документы/C++ SFML Game (копия)/UnitSprites.h
+
+1501443137 source:/home/artes/Документы/C++ SFML Game (копия)/Location.cpp
+	<thread>
+	<chrono>
+	<time.h>
+	<cmath>
+	<iostream>
+	"Location.h"
+	"MapSprites.h"
+	"PathFinding.h"
+
+1501309058 /home/artes/Документы/C++ SFML Game (копия)/MapSprites.h
+
+1501254854 /home/artes/Документы/C++ SFML Game (копия)/PathFinding.h
+	<vector>
+	<stack>
+	<queue>
+	<SFML/System/Vector2.hpp>
+
+1501508478 source:/home/artes/Документы/C++ SFML Game (копия)/main.cpp
+	<time.h>
+	<thread>
+	<iostream>
+	<set>
+	<SFML/System.hpp>
+	<SFML/Graphics/RenderWindow.hpp>
+	<SFML/Graphics/View.hpp>
+	<SFML/Graphics/Vertex.hpp>
+	<SFML/Window/Event.hpp>
+	<SFML/Window/Keyboard.hpp>
+	<SFML/Graphics/Texture.hpp>
+	<SFML/Graphics/Sprite.hpp>
+	"Location.h"
+	"MapSprites.h"
+	"Interface.h"
+	"Units.h"
+	"CameraManager.h"
+
+1501442667 /home/artes/Документы/C++ SFML Game (копия)/CameraManager.h
+
+1486144522 source:/home/artes/Документы/C++ SFML Game (копия)/PathFinding.cpp
+	"PathFinding.h"
+
+1498118002 source:/home/artes/Документы/C++ SFML Game (копия)/SpriteVertex.cpp
+	<SFML/Graphics.hpp>
+	<iostream>
+	"Tileset.h"
+	"SpriteVertex.h"
+
+1501327017 source:/home/artes/Документы/C++ SFML Game (копия)/StaticTiledMap.cpp
+	<algorithm>
+	<SFML/Graphics/RenderTarget.hpp>
+	<SFML/System/Vector2.hpp>
+	"StaticTiledMap.h"
+
+1486152261 source:/home/artes/Документы/C++ SFML Game (копия)/Tileset.cpp
+	<string>
+	<SFML/Graphics.hpp>
+	"Tileset.h"
+
+1501053656 source:/home/artes/Документы/C++ SFML Game (копия)/Units.cpp
+	<queue>
+	<SFML/System/Vector2.hpp>
+	"Units.h"
+	"PathFinding.h"
+
+1501508580 source:/home/artes/Документы/C++ SFML Game (копия)/UnitsPatterns.cpp
+	<iostream>
+	<vector>
+	"UnitsPatterns.h"
+

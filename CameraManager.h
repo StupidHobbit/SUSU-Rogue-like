@@ -1,12 +1,12 @@
-const int MAX_SCALE = 5; 
-const float PLUS_ZOOM = 1.25, MINUS_ZOOM = 0.80, VELOCITY = 600, VELOCITY2 = 5;
+const int MAX_SCALE = 5;
+const float PLUS_ZOOM = 1.25, MINUS_ZOOM = 0.80, VELOCITY = 600, VELOCITY2 = 2;
 
 
 
 class CameraManager{
 public:
-	CameraManager(sf::RenderTarget &app, int maxScale = MAX_SCALE): 
-	app(&app), maxScale(maxScale), curScale(0), 
+	CameraManager(sf::RenderTarget &app, int maxScale = MAX_SCALE):
+	app(&app), maxScale(maxScale), curScale(0),
 	cam(app.getDefaultView()), zoom(1),
 	preferableCenter(cam.getCenter()){}
 	void updateEvent(sf::Event eve){
@@ -37,16 +37,16 @@ public:
 					cam = app->getDefaultView();
 					curScale = 0;
 					break;
-				
+
 				default:
 					break;
 			}
-	} 
+	}
 	void update(){
 		float delta = deltaT.restart().asSeconds();
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::W))
             cam.move(0.f,-VELOCITY * delta);
-            
+
         if(sf::Keyboard::isKeyPressed(sf::Keyboard::A))
             cam.move(-VELOCITY * delta,0.f);
 
@@ -57,10 +57,10 @@ public:
             cam.move(VELOCITY * delta,0.f);
         if (preferableCenter.x != 0){
 			cam.move((preferableCenter - cam.getCenter()) * VELOCITY2 * delta);
-		    if (abs((preferableCenter - cam.getCenter()).x) + abs((preferableCenter - cam.getCenter()).y) < 0.5) preferableCenter.x = 0;
+		    if (abs((preferableCenter - cam.getCenter()).x) + abs((preferableCenter - cam.getCenter()).y) < 2) preferableCenter.x = 0;
         }
         app->setView(cam);
-	} 
+	}
 	void setCenter(const sf::Vector2f &center){
 		cam.setCenter(center);
 	}
@@ -72,7 +72,7 @@ private:
 	sf::Vector2f ms, delta, prev;
 	sf::RenderTarget *app;
 	sf::Vector2f preferableCenter;
-	sf::Clock deltaT; 
+	sf::Clock deltaT;
 	int curScale, maxScale;
 	float zoom;
 };

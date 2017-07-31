@@ -11,10 +11,6 @@
 
 float SPIKE_CHANCE = 0.006, BROKEN_PLATE_CHANCE = 0.05;
 
-bool checkChance(float chance){
-	return rand() / (float)RAND_MAX <= chance;
-}
-
 Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 {
 	map.assign(h, std::vector<char>(w, 1));
@@ -36,7 +32,6 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 	int illegal_door_num = w * h / gridSize / gridSize / 4;
 
 	std::vector< std::vector<char> > tempMap(h, std::vector<char>(w, 0));
-	std::vector<Room> rooms;
 	for (int ix = 2; ix + gridSize + 1 < w; ix += gridSize)
 		for (int iy = 2; iy + gridSize + 1 < h; iy += gridSize){
 			if (randint(1, 100) < room_rate){
@@ -84,7 +79,6 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
             t_map[y * w + x] = PILLAR;
         }
 	}
-    ///std::cout << '!' << std::endl;
 	for (int i = 0; i < rooms.size(); i++){
 		bool f = false;
 		while(!f){
@@ -96,6 +90,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 			Room room1 = rooms[i], room2 = rooms[temp];
 			sf::Vector2i door1 = room1.getRandWall(),
 						 door2 = room2.getRandWall();
+
 			{
 			bool f = true;
 			int dx[] = { 0, 1, 0, -1 };
@@ -120,7 +115,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 				int tx = (path.top() + (path.top() - door1)).x,
                     ty = (path.top() + (path.top() - door1)).y;
 				if (t_map[ty*w + tx] == PILLAR){
-                    t_map[ty*w + tx] = PILLAR;
+                    t_map[ty*w + tx] = PLATE2;
                     map[ty][tx] = 0;
                 }
 				ix = path.top().x, iy = path.top().y;
@@ -139,7 +134,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 				tx = (prev_i + (prev_i - door2)).x,
 				ty = (prev_i + (prev_i - door2)).y;
 				if (t_map[ty*w + tx] == PILLAR){
-                    t_map[ty*w + tx] = PILLAR;
+                    t_map[ty*w + tx] = PLATE2;
                     map[ty][tx] = 0;
                 }
 				map[iy][ix] = 0;
@@ -151,7 +146,7 @@ Location::Location(int w, int h): tileset("data/tileset.png", 32), w(w), h(h)
 		}
 	}
 	for(int i = 0; i < illegal_door_num; i++){
-		while(true){
+		for(int j = 0; j < 10000; j++){
 			auto pos = rooms[rand() % rooms.size()].getRandWall();
 			if (t_map[pos.y * w + pos.x] == WALL2 && (t_map[pos.y * w + pos.x + 1] == WALL2 && t_map[pos.y * w + pos.x - 1] == WALL2 &&
 				t_map[pos.y * w + pos.x + w] != WALL2 && t_map[pos.y * w + pos.x - w] != WALL2 ||
@@ -190,12 +185,25 @@ sf::Vector2i Location::findFreePos(){
 	}
 }
 
+
 void Location::addUnit(Unit *punit, int tileNum){
-	sf::Vector2i pos = findFreePos();
+	sf::Vector2i pos = findFreeRoomPos();
 	punit->position = pos;
 	unitsMap[pos.y][pos.x] = punit;
 	units.insert(punit);
 	punit->id = unitsSprites.append(pos.x, pos.y, tileNum);
+	hpBars.append(pos.x, pos.y, HP0 - HP_NUM + 1);
+	punit->location = this;
+	//std::cout << tileNum << std::endl;
+	//updateVisibility(punit);
+}
+
+void Location::addUnit(Unit *punit, sf::Vector2i pos){
+	if (!pos.x) pos = findFreeRoomPos();
+	punit->position = pos;
+	unitsMap[pos.y][pos.x] = punit;
+	units.insert(punit);
+	punit->id = unitsSprites.append(pos.x, pos.y, punit->spriteNum);
 	hpBars.append(pos.x, pos.y, HP0 - HP_NUM + 1);
 	punit->location = this;
 	//std::cout << tileNum << std::endl;
@@ -215,6 +223,13 @@ void Location::removeUnit(Unit *punit){
 	unitsMap[punit->position.y][punit->position.x] = NULL;
 }
 
+sf::Vector2i Location::findFreeRoomPos(int roomNum){
+    if (roomNum == -1) roomNum = rand() % rooms.size();
+	while(true){
+        auto temp = rooms[roomNum].getRandGrid();
+		if (!map[temp.y][temp.x]) return temp;
+	}
+}
 
 sf::Vector2i Room::getRandWall(){
 	if (rand() % 2){
@@ -226,11 +241,15 @@ sf::Vector2i Room::getRandWall(){
 	}
 }
 
+sf::Vector2i Room::getRandGrid(){
+	return pos + sf::Vector2i(randint(1, size.x - 2), randint(1, size.x - 2));
+}
 
 Room::Room(sf::Vector2i pos, sf::Vector2i size):
 pos(pos), size(size)
 {}
 
 int randint(int a, int b){
+    //if (a > b) return b;
 	return a + rand() % (b - a + 1);
 }

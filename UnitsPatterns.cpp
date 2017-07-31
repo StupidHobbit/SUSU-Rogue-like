@@ -1,10 +1,11 @@
 #include <iostream>
+#include <vector>
 #include "UnitsPatterns.h"
 
 UnitPattern getPattern(std::string name){
 	static bool is_init = false;
 	static std::unordered_map<std::string, UnitPattern> patterns;
-	
+	static std::vector<std::string> names;
 	if (!is_init){
 		std::ifstream fin("data/Units.txt");
 		std::string temp, curUnit, tempChar;
@@ -14,11 +15,12 @@ UnitPattern getPattern(std::string name){
 			if (temp[temp.size() - 1] == ':'){
 				temp.pop_back();
 				curUnit = temp;
+				names.push_back(curUnit);
 				pattern.name = temp;
 				//std::cout << curUnit;
 				patterns[temp] = pattern;
 			}
-			else{	
+			else{
 				fin >> tempChar;
 				//std::cout << temp[temp.size() - 1] << std::endl;
 				if (temp == "hp")
@@ -35,6 +37,6 @@ UnitPattern getPattern(std::string name){
 		}
 		is_init = true;
 	}
-	
+    if (name == "") return patterns[names[rand() % names.size()]];
 	return patterns[name];
 }
